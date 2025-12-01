@@ -11,19 +11,20 @@ public class Jeu {
 
     private Joueur joueur1;
     private Joueur joueur2;
-    private Borne borne; // 1 seule borne pour la V1
+    private List<Borne> bornes;
     private GroupeDeCartes pioche;
     
     private Joueur joueurActuel; 
 
-    private static int TAILLE_MAX_MAIN = 6; 
+    private static int TAILLE_MAX_MAIN = 6;
+    private static int NB_BORNES = 9;
 
     // Constructeur
     public Jeu(String nomJ1, String nomJ2) {
         this.joueur1 = new Joueur(nomJ1, 1);
         this.joueur2 = new Joueur(nomJ2, 2);
         this.joueurActuel = joueur1;
-        this.borne = new Borne();
+        this.bornes = new ArrayList<>();
         this.pioche = new GroupeDeCartes();
 
         initialiserPartie();
@@ -31,9 +32,15 @@ public class Jeu {
 
     // Initialisation 
     private void initialiserPartie() {
+        initialiserBornes();
         genererPioche();
-
         distribuerCartes();
+    }
+
+    private void initialiserBornes() {
+        for (int i = 0; i < NB_BORNES; i++) {
+            bornes.add(new Borne());
+        }
     }
 
     private void genererPioche() {
@@ -62,7 +69,8 @@ public class Jeu {
     }
 
     // Méthodes
-    public boolean jouerTour(int indexCarteJoue, Borne borne) {
+    public boolean jouerTour(int indexCarteJoue, int indexBorne) {
+        Borne borne = bornes.get(indexBorne);
         Carte carteJouee = joueurActuel.jouerCarte(indexCarteJoue);
         
         System.out.println(joueurActuel.getNom() + " joue " + carteJouee.description());
@@ -71,7 +79,7 @@ public class Jeu {
 
         verifierVictoireBorne(borne);
 
-        int resultatPartie = verifierFinPartie(borne);
+        int resultatPartie = verifierFinPartie();
         if (resultatPartie != 0) {
             afficherVainqueur(resultatPartie);
             return false;
@@ -113,16 +121,39 @@ public class Jeu {
         }
     }
 
-    private int verifierFinPartie(Borne borne) {
-        Joueur possesseur = borne.getPossesseur();
+    private int verifierFinPartie() {
+        int bornesJ1 = 0;
+        int bornesJ2 = 0;
+        
+        int[] etatPartie = new int[NB_BORNES];
 
-        if (possesseur == joueur1) {
-            return 1;
-        }else if (possesseur == joueur2) {
-            return 2;
-        }else{
-            return 0;
+        for (int i = 0; i < bornes.size(); i+=1){
+            Joueur possesseur = bornes.get(i).getPossesseur();
+            if (possesseur == joueur1) {
+                bornesJ1 += 1;
+                etatPartie[i] = 1;
+            }else if (possesseur == joueur2) {
+                bornesJ2 += 1;
+                etatPartie[i] = 2;
+            }else{
+                etatPartie[i] = 0;
+            }
         }
+        if (bornesJ1 >= 5) {
+            return 1;
+        }
+        if (bornesJ2 >= 5) {
+            return 2;
+        }
+        for (int i = 0; i <= NB_BORNES - 3; i++) {
+            if (etatPartie[i] == 1 && etatPartie[i+1] == 1 && etatPartie[i+2] == 1) {
+                return 1;
+            }
+            if (etatPartie[i] == 2 && etatPartie[i+1] == 2 && etatPartie[i+2] == 2) {
+                return 2;
+            }
+        }
+        return 0;
     }
 
     private void afficherVainqueur(int resultat) {
@@ -141,7 +172,8 @@ public class Jeu {
     public Joueur getJoueurActuel() { 
         return joueurActuel; 
     }
-    public Borne getBorne() { 
-        return borne; 
+
+    public List<Borne> getBornes() {
+         return bornes; 
     }
 }
