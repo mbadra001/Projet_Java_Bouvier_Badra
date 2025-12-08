@@ -18,7 +18,7 @@ public class ConsoleView {
    
     } 
 
-// IA
+// IA--------------------
 // focntion pour afficher la main d'un joueur
     public void afficherMain(Joueur joueur) {
          System.out.println("\nMain de " + joueur.getNom() + " :");
@@ -30,7 +30,7 @@ public class ConsoleView {
     }
     }
 
-
+//------------------------------
 // fonction afficher action possible
     public void afficherActionsPossibles(boolean Revendiquer, boolean Tactique) {
         System.out.println("Actions possibles :");
@@ -56,10 +56,11 @@ public class ConsoleView {
     }
 
 // focntion pour afficher revendication 
-    public void afficherRevendication(Joueur gagnant) {
-        System.out.println("Borne revendiquée par : " + gagnant.getNom());
+    public void afficherRevendication(Joueur gagnant, int idBorne) {
+        System.out.println("Borne n°" + idBorne + " revendiquée par : " + gagnant.getNom());
+    }
 
-}   
+   
 
 
     public void afficherVictoire(Joueur joueur) {
