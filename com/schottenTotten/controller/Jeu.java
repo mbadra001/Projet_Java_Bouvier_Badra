@@ -4,6 +4,7 @@ import com.schottenTotten.model.Borne;
 import com.schottenTotten.model.Carte;
 import com.schottenTotten.model.GroupeDeCartes;
 import com.schottenTotten.model.Joueur;
+import com.schottenTotten.view.ConsoleView;
 
 import java.util.*;
 
@@ -15,17 +16,20 @@ public class Jeu {
     private GroupeDeCartes pioche;
     
     private Joueur joueurActuel; 
+    
+    private ConsoleView view;
 
     private static int TAILLE_MAX_MAIN = 6;
     private static int NB_BORNES = 9;
 
-    // Constructeur
-    public Jeu(String nomJ1, String nomJ2) {
+    // Constructeur : Ajout du paramètre ConsoleView view
+    public Jeu(String nomJ1, String nomJ2, ConsoleView view) {
         this.joueur1 = new Joueur(nomJ1, 1);
         this.joueur2 = new Joueur(nomJ2, 2);
         this.joueurActuel = joueur1;
         this.bornes = new ArrayList<>();
         this.pioche = new GroupeDeCartes();
+        this.view = view; // Initialisation de la vue
 
         initialiserPartie();
     }
@@ -54,7 +58,7 @@ public class Jeu {
         }
         
         // mélange
-        Collections.shuffle(Deck); //fonction fournit par ia 
+        Collections.shuffle(Deck); 
 
         for (Carte carte : Deck) {
             pioche.ajouter(carte);
@@ -69,27 +73,75 @@ public class Jeu {
     }
 
     // Méthodes
+
     public boolean jouerTour(int indexCarteJoue, int indexBorne) {
+        // regarder si l'index de la carte et de la borne sont valides
+        if (indexBorne < 0 || indexBorne >= bornes.size()) {
+            view.afficherErreur("Numéro de borne invalide !"); 
+            return true; // On continue la partie sans changer de joueur
+        }
+
         Borne borne = bornes.get(indexBorne);
+        
+        // 1. On retire la carte TEMPORAIREMENT
         Carte carteJouee = joueurActuel.jouerCarte(indexCarteJoue);
         
-        System.out.println(joueurActuel.getNom() + " joue " + carteJouee.description());
+        if (carteJouee == null) {
+            view.afficherErreur("Carte invalide (index incorrect) !");
+             return true;
+        }
 
-        borne.poserCarte(carteJouee, joueurActuel);
+        view.afficherMessage(joueurActuel.getNom() + " joue " + carteJouee.description()); 
 
+        // 2. On essaie de la poser
+        boolean coupValide = borne.poserCarte(carteJouee, joueurActuel);
+
+        if (!coupValide) {
+            // La borne est pleine ou prise
+            view.afficherErreur("IMPOSSIBLE : Borne pleine ou déjà prise !");
+            
+            // CRUCIAL : On rend la carte au joueur !
+            joueurActuel.recevoirCarte(carteJouee); 
+            
+            // On retourne true (partie continue) MAIS on ne change pas de joueur
+            return true; 
+        }
+
+        // Si on arrive ici, le coup est valide
         verifierVictoireBorne(borne);
 
         int resultatPartie = verifierFinPartie();
         if (resultatPartie != 0) {
             afficherVainqueur(resultatPartie);
-            return false;
+            return false; // Fin de partie
         }
 
         piocherCarte(joueurActuel);
-
-        changerJoueur();
+        changerJoueur(); // On change de joueur uniquement si le coup était valide
         
         return true;
+    }
+
+    private void verifierVictoireBorne(Borne borne) {
+        if (borne.estComplete()) {
+            GroupeDeCartes g1 = borne.getCartes(joueur1);
+            GroupeDeCartes g2 = borne.getCartes(joueur2);
+
+            int resultat = Decision.determinerGagnant(g1, g2);
+            
+            // On récupère l'explication
+            String raison = Decision.expliquerVictoire(g1, g2);
+
+            if (resultat == 1) {
+                borne.revendiquer(joueur1);
+                view.afficherRevendication(joueur1);
+                view.afficherMessage("Victoire grâce à : " + raison); // Affiche le détail
+            } else if (resultat == 2) { 
+                borne.revendiquer(joueur2);
+                view.afficherRevendication(joueur2);
+                view.afficherMessage("Victoire grâce à : " + raison); // Affiche le détail
+            }
+        }
     }
 
     public void piocherCarte(Joueur joueur) {
@@ -104,21 +156,8 @@ public class Jeu {
         } else {
             joueurActuel = joueur1;
         }
-        System.out.println("\n--- C'est au tour de " + joueurActuel.getNom() + " ---");
-    }
-
-    private void verifierVictoireBorne(Borne borne) {
-        if (borne.estComplete()) {
-            GroupeDeCartes g1 = borne.getCartes(joueur1);
-            GroupeDeCartes g2 = borne.getCartes(joueur2);
-
-            int resultat = Decision.determinerGagnant(g1, g2);
-            if (resultat == 1) {
-                borne.revendiquer(joueur1);
-            }else {
-                borne.revendiquer(joueur2);
-            }
-        }
+        // UTILISATION DE LA VUE
+        view.afficherMessage("--- C'est au tour de " + joueurActuel.getNom() + " ---");
     }
 
     private int verifierFinPartie() {
@@ -157,15 +196,12 @@ public class Jeu {
     }
 
     private void afficherVainqueur(int resultat) {
-        System.out.println("\n=================================");
-        System.out.println("FIN DE LA PARTIE !");
-
+        // UTILISATION DE LA VUE
         if (resultat == 1) {
-            System.out.println("BRAVO ! " + joueur1.getNom() + " a gagné la partie !");
+            view.afficherVictoire(joueur1);
         } else {
-            System.out.println("BRAVO ! " + joueur2.getNom() + " a gagné la partie !");
+            view.afficherVictoire(joueur2);
         }
-        System.out.println("=================================");
     }
 
     // Getters
