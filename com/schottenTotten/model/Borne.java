@@ -20,21 +20,24 @@ public class Borne {
         this.possesseur = null;
     }
 
-    // Méthodes
-    public void poserCarte(Carte carte, Joueur joueur) {
+    // Méthodes 
+    // Retourne true si la carte a été posée avec succès 
+    public boolean poserCarte(Carte carte, Joueur joueur) {
         if (possesseur != null) {
-            System.out.println("Erreur : La borne est déjà revendiquée !");
-            return;
+            // On retourne false : échec
+            return false;
         }
 
-        GroupeDeCartes coteConcerne;
-        if (joueur.getNumero() == 1) {
-            coteConcerne = cartesJoueur1;
-        } else {
-            coteConcerne = cartesJoueur2;
+        
+        // Vérification que la borne n'est pas pleine pour ce joueur
+        GroupeDeCartes coteConcerne = (joueur.getNumero() == 1) ? cartesJoueur1 : cartesJoueur2;
+        if (coteConcerne.getNombreDeCartes() >= CAPACITE_MAX) {
+            return false;
         }
 
         coteConcerne.ajouter(carte);
+        return true; // Succès
+    
     }
 
     public boolean estComplete() {
