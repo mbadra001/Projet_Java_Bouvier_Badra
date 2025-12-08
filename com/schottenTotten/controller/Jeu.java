@@ -77,7 +77,7 @@ public class Jeu {
     public boolean jouerTour(int indexCarteJoue, int indexBorne) {
         // regarder si l'index de la carte et de la borne sont valides
         if (indexBorne < 0 || indexBorne >= bornes.size()) {
-            view.afficherErreur("Numéro de borne invalide !"); 
+           view.afficherErreur("Numéro de borne invalide (" + indexBorne + ") !");
             return true; // On continue la partie sans changer de joueur
         }
 
@@ -98,7 +98,7 @@ public class Jeu {
 
         if (!coupValide) {
             // La borne est pleine ou prise
-            view.afficherErreur("IMPOSSIBLE : Borne pleine ou déjà prise !");
+            view.afficherErreur("IMPOSSIBLE : La borne " + indexBorne + " est pleine ou déjà prise !");
             
             // CRUCIAL : On rend la carte au joueur !
             joueurActuel.recevoirCarte(carteJouee); 
@@ -129,17 +129,23 @@ public class Jeu {
 
             int resultat = Decision.determinerGagnant(g1, g2);
             
-            // On récupère l'explication
+            // On récup l'index de la borne pour l'affichage
+            int indexBorne = bornes.indexOf(borne);
+            
+            // On récup la raison de la victoire
             String raison = Decision.expliquerVictoire(g1, g2);
 
             if (resultat == 1) {
                 borne.revendiquer(joueur1);
-                view.afficherRevendication(joueur1);
-                view.afficherMessage("Victoire grâce à : " + raison); // Affiche le détail
+                //  on passe indexBorne en 2ème argument
+                view.afficherRevendication(joueur1, indexBorne);
+                view.afficherMessage("Victoire grâce à : " + raison);
+                
             } else if (resultat == 2) { 
                 borne.revendiquer(joueur2);
-                view.afficherRevendication(joueur2);
-                view.afficherMessage("Victoire grâce à : " + raison); // Affiche le détail
+                // on passe indexBorne en 2ème argument
+                view.afficherRevendication(joueur2, indexBorne);
+                view.afficherMessage("Victoire grâce à : " + raison);
             }
         }
     }
