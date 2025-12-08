@@ -68,4 +68,23 @@ public class Decision { //il va falloir aussi géré le cas de l'egalité
         for (Carte c : cartes) somme += c.getValeur();
         return somme;
     }
+
+    // méthode pour expliquer le résultat
+    public static String expliquerVictoire(GroupeDeCartes g1, GroupeDeCartes g2) {
+        int score1 = calculerForce(g1);
+        int score2 = calculerForce(g2);
+        
+        String type1 = nomCombinaison(score1);
+        String type2 = nomCombinaison(score2);
+        
+        return "J1 [" + type1 + " (" + (score1 % 100) + ")] vs J2 [" + type2 + " (" + (score2 % 100) + ")]";
+    }
+
+    private static String nomCombinaison(int score) {
+        if (score >= 500) return "Suite Couleur";
+        if (score >= 400) return "Brelan";
+        if (score >= 300) return "Couleur";
+        if (score >= 200) return "Suite";
+        return "Somme";
+    }
 }
