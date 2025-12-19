@@ -23,7 +23,7 @@ public class IaAleatoire implements StrategieJeu {
             // On vérifie si le joueur peut encore jouer dessus
             if (b.getPossesseur() == null) {
                 // Vérifie si le coté est plein
-                if (b.getCartes(joueur).getNombreDeCartes() < Borne.CAPACITE_MAX) {
+                if (b.getCartes(joueur).getNombreDeCartes() < b.getCapaciteMax()) {
                     bornesValides.add(i);
                 }
             }

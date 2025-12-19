@@ -74,9 +74,30 @@ public class InputView {
         return demanderEntier();
     }
 
+    public static int demanderChoixStratege() {
+        System.out.print("Action : 1. Déplacer / 2. Défausser : ");
+        return demanderEntier();
+    }
 
+    public static int demanderIndexCarteSurBorne() {
+        System.out.print("Index de la carte sur la borne : ");
+        return demanderEntier();
+    }
 
+    public static int demanderCouleur() {
+        System.out.print("Couleur (1-6) : ");
+        return demanderEntier();
+    }
 
+    public static int demanderValeur(int min, int max) {
+        System.out.print("Valeur (" + min + "-" + max + ") : ");
+        return demanderEntier();
+    }
+
+    public static int demanderBorneCible(String label) {
+        System.out.print("Index borne " + label + " : ");
+        return demanderEntier();
+    }
 
 // ----------------------------------------------------------------------------------------------
     public static void fermerScanner() {

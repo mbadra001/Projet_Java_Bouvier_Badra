@@ -3,6 +3,7 @@ package com.schottenTotten;
 import com.schottenTotten.ai.Coup;        // --- AJOUT  pour IA ---
 import com.schottenTotten.ai.IaAleatoire; // --- AJOUT pour IA ---
 import com.schottenTotten.controller.Jeu;
+import com.schottenTotten.controller.JeuFactory;
 import com.schottenTotten.view.ConsoleView;
 import com.schottenTotten.view.InputView;
 import com.schottenTotten.view.MenuView;
@@ -14,6 +15,14 @@ public class Main {
         ConsoleView gameView = new ConsoleView();
 
         menuView.afficherMenuPrincipal();
+
+        int choixVariante = menuView.demanderVarianteDeJeu();
+        String typeVariante;
+        if (choixVariante == 2) {
+            typeVariante = "TACTIQUE";
+        }else{
+            typeVariante = "CLASSIQUE";
+        }
 
         // On demande d'abord si on veut jouer contre l'IA
         boolean contreIA = menuView.demanderAvecIA();
@@ -33,7 +42,7 @@ public class Main {
         }
 
         // 3. Création du jeu (Contrôleur)
-        Jeu jeu = new Jeu(nomJ1, nomJ2, gameView);
+        Jeu jeu = JeuFactory.creerJeu(typeVariante, nomJ1, nomJ2, gameView);
         
         boolean partieEnCours = true;
 

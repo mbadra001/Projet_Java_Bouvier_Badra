@@ -22,6 +22,15 @@ public class Carte {
         return valeur;
     }
 
+    // Setters
+
+    public void setCouleur(int couleur) {
+        this.couleur = couleur;
+    }
+    public void setValeur(int valeur) {
+        this.valeur = valeur;
+    }
+
     // Affichage
     public String description() {
         return "[Couleur : " + couleur + ", Valeur : " + valeur + "]"; 

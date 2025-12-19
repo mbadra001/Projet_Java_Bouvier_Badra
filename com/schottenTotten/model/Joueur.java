@@ -8,6 +8,8 @@ public class Joueur extends GroupeDeCartes {
 
     private String nom;
     private int numero;
+    private List<Carte> main;
+
     private StrategieJeu strategie; // AJOUT : permet de stocker l'IA si c'en est une
 
     // Constructeur
@@ -15,6 +17,7 @@ public class Joueur extends GroupeDeCartes {
         super();
         this.nom = nom;
         this.numero = numero;
+        this.main = new ArrayList<>();
         this.strategie = null; // Par défaut, pas de stratégie (c'est un humain)
     }
 
@@ -62,6 +65,9 @@ public class Joueur extends GroupeDeCartes {
         return super.getCartes();
     }
 
+    public Carte getCarte(int index) {
+        return super.getCartes().get(index);
+    }
     // --- Affichage ---
 // IA
     @Override

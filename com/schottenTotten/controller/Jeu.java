@@ -14,21 +14,23 @@ public class Jeu {
     private Joueur joueur2;
     private List<Borne> bornes;
     private GroupeDeCartes pioche;
+
+    private Variante variante;
     
     private Joueur joueurActuel; 
     
     private ConsoleView view;
 
-    private static int TAILLE_MAX_MAIN = 6;
     private static int NB_BORNES = 9;
 
     // Constructeur : Ajout du paramètre ConsoleView view
-    public Jeu(String nomJ1, String nomJ2, ConsoleView view) {
+    public Jeu(String nomJ1, String nomJ2,Variante variante, ConsoleView view) {
         this.joueur1 = new Joueur(nomJ1, 1);
         this.joueur2 = new Joueur(nomJ2, 2);
         this.joueurActuel = joueur1;
         this.bornes = new ArrayList<>();
-        this.pioche = new GroupeDeCartes();
+        this.variante = variante;
+        this.pioche = variante.genererPioche();
         this.view = view; // Initialisation de la vue
 
         initialiserPartie();
@@ -37,7 +39,6 @@ public class Jeu {
     // Initialisation 
     private void initialiserPartie() {
         initialiserBornes();
-        genererPioche();
         distribuerCartes();
     }
 
@@ -47,26 +48,9 @@ public class Jeu {
         }
     }
 
-    private void genererPioche() {
-        List<Carte> Deck = new ArrayList<>();
-
-        // création des 54 cartes
-        for (int c = 1; c <= 6; c++) {
-            for (int v = 1; v <= 9; v++) {
-                Deck.add(new Carte(c, v));
-            }
-        }
-        
-        // mélange
-        Collections.shuffle(Deck); 
-
-        for (Carte carte : Deck) {
-            pioche.ajouter(carte);
-        }
-    }
-
     private void distribuerCartes() {
-        for (int i = 0; i < TAILLE_MAX_MAIN; i++) {
+        int taille = variante.getTailleMain();
+        for (int i = 0; i < taille; i++) {
             piocherCarte(joueur1);
             piocherCarte(joueur2);
         }
@@ -74,41 +58,54 @@ public class Jeu {
 
     // Méthodes
 
-    public boolean jouerTour(int indexCarteJoue, int indexBorne) {
-        // regarder si l'index de la carte et de la borne sont valides
-        if (indexBorne < 0 || indexBorne >= bornes.size()) {
-           view.afficherErreur("Numéro de borne invalide (" + indexBorne + ") !");
-            return true; // On continue la partie sans changer de joueur
-        }
-
-        Borne borne = bornes.get(indexBorne);
-        
-        // 1. On retire la carte TEMPORAIREMENT
-        Carte carteJouee = joueurActuel.jouerCarte(indexCarteJoue);
-        
+    public boolean jouerTour(int indexCarteJouee, int indexBorne) {
+        Carte carteJouee = joueurActuel.getCarte(indexCarteJouee);
         if (carteJouee == null) {
             view.afficherErreur("Carte invalide (index incorrect) !");
-             return true;
+            return true;
         }
 
-        view.afficherMessage(joueurActuel.getNom() + " joue " + carteJouee.description()); 
-
-        // 2. On essaie de la poser
-        boolean coupValide = borne.poserCarte(carteJouee, joueurActuel);
-
-        if (!coupValide) {
-            // La borne est pleine ou prise
-            view.afficherErreur("IMPOSSIBLE : La borne " + indexBorne + " est pleine ou déjà prise !");
+        // --- Cas 1 : Carte Action (Spécifique à la Variante Tactique) ---
+        if (variante.estCarteAction(carteJouee)) {
+            joueurActuel.jouerCarte(indexCarteJouee);
+            view.afficherMessage(joueurActuel.getNom() + " joue l'action " + carteJouee.description());
             
-            // CRUCIAL : On rend la carte au joueur !
-            joueurActuel.recevoirCarte(carteJouee); 
+            Joueur adversaire = (joueurActuel == joueur1) ? joueur2 : joueur1;
+            // Note: L'IA ne sait pas jouer les actions complexes pour l'instant
+            variante.executerAction(carteJouee, joueurActuel, adversaire, pioche, bornes, view);
+
+        } 
+        // --- Cas 2 : Carte Clan/Elite (Pose sur Borne) ---
+        else {
+            if (indexBorne < 0 || indexBorne >= bornes.size()) {
+                view.afficherErreur("Numéro de borne invalide !");
+                return true;
+            }
+            Borne borne = bornes.get(indexBorne);
+
+            if (borne.getPossesseur() != null) {
+                view.afficherErreur("Borne déjà gagnée !");
+                return true;
+            }
+
+            // On retire la carte et on la pose
+            joueurActuel.jouerCarte(indexCarteJouee);
+            view.afficherMessage(joueurActuel.getNom() + " pose " + carteJouee.description() + " sur Borne " + indexBorne);
+
+            boolean poseOk = borne.poserCarte(carteJouee, joueurActuel);
             
-            // On retourne true (partie continue) MAIS on ne change pas de joueur
-            return true; 
+            if (!poseOk) {
+                // Si la borne est pleine (ex: Combat de boue limite atteinte)
+                view.afficherErreur("Impossible de poser ici (Pleine/Max atteint).");
+                joueurActuel.recevoirCarte(carteJouee); // On rend la carte
+                return true;
+            }
+            
+            // Effets immédiats (ex: Combat de Boue)
+            variante.appliquerEffetImmediat(carteJouee, borne);
+            
+            verifierVictoireBorne(borne);
         }
-
-        // Si on arrive ici, le coup est valide
-        verifierVictoireBorne(borne);
 
         int resultatPartie = verifierFinPartie();
         if (resultatPartie != 0) {
@@ -123,11 +120,11 @@ public class Jeu {
     }
 
     private void verifierVictoireBorne(Borne borne) {
-        if (borne.estComplete()) {
+        if (borne.estComplete() && borne.getPossesseur() == null) {
             GroupeDeCartes g1 = borne.getCartes(joueur1);
             GroupeDeCartes g2 = borne.getCartes(joueur2);
 
-            int resultat = Decision.determinerGagnant(g1, g2);
+            int resultat = variante.donnerGagnant(g1, g2);
             
             // On récup l'index de la borne pour l'affichage
             int indexBorne = bornes.indexOf(borne);

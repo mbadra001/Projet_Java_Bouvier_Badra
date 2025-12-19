@@ -103,4 +103,22 @@ public class ConsoleView {
         System.out.println(joueur.getNom() + " a utilisé la carte tactique : " + carte);
     }
     //-------------------------------------------------------------------------
+    public void afficherEffetTactique(String msg) {
+        System.out.println("\n>>> [EFFET TACTIQUE] : " + msg);
+    }
+
+    public void afficherConfigurationCarte(String nom) {
+        System.out.println("\n--- Configuration de la carte : " + nom + " ---");
+    }
+
+    public void afficherSelectionCarteSurBorne(GroupeDeCartes g) {
+        System.out.println("Cartes sur la borne :");
+        for (int i = 0; i < g.getNombreDeCartes(); i++) {
+            System.out.println("  [" + i + "] " + g.getCarte(i).description());
+        }
+    }
+
+    public void afficherErreurTactique(String msg) {
+        System.out.println("! Action Tactique impossible : " + msg);
+    }
 }

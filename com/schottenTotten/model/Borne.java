@@ -10,7 +10,7 @@ public class Borne {
     
     private Joueur possesseur; 
 
-    public static int CAPACITE_MAX = 3;
+    private int capaciteMax = 3;
 
     // Constructeur
     public Borne() {
@@ -31,7 +31,7 @@ public class Borne {
         
         // Vérification que la borne n'est pas pleine pour ce joueur
         GroupeDeCartes coteConcerne = (joueur.getNumero() == 1) ? cartesJoueur1 : cartesJoueur2;
-        if (coteConcerne.getNombreDeCartes() >= CAPACITE_MAX) {
+        if (coteConcerne.getNombreDeCartes() >= capaciteMax) {
             return false;
         }
 
@@ -41,8 +41,8 @@ public class Borne {
     }
 
     public boolean estComplete() {
-        return cartesJoueur1.getNombreDeCartes() == CAPACITE_MAX && 
-               cartesJoueur2.getNombreDeCartes() == CAPACITE_MAX;
+        return cartesJoueur1.getNombreDeCartes() == capaciteMax && 
+               cartesJoueur2.getNombreDeCartes() == capaciteMax;
     }
     
     // Setters 
@@ -50,8 +50,17 @@ public class Borne {
     public void revendiquer(Joueur joueur) {
         this.possesseur = joueur;
     }
+
+    public void setCapaciteMax(int max) {
+        this.capaciteMax = max;
+    }
+
     
     // Getters
+    public int getCapaciteMax() {
+        return this.capaciteMax;
+    }
+
     public Joueur getPossesseur() {
         return possesseur;
     }
