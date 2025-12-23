@@ -21,7 +21,7 @@ public class Joueur extends GroupeDeCartes {
         this.strategie = null; // Par défaut, pas de stratégie (c'est un humain)
     }
 
-    // --- AJOUTS SPECIFIQUES POUR L'IA ---
+    // ajout pou IA
 
     public void setStrategie(StrategieJeu strategie) {
         this.strategie = strategie;

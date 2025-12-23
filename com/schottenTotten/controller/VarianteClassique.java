@@ -53,6 +53,6 @@ public class VarianteClassique implements Variante {
     }
 
     @Override
-    public void executerAction(Carte carte, Joueur joueur, Joueur adversaire, GroupeDeCartes pioche, List<Borne> bornes, ConsoleView view){
+   public void executerAction(CarteTactique carte, Joueur joueur, Joueur adversaire, GroupeDeCartes pioche, List<Borne> bornes, ConsoleView view, com.schottenTotten.ai.Coup coup){
     }
 }

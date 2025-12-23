@@ -2,6 +2,7 @@ package com.schottenTotten.controller;
 
 import com.schottenTotten.model.Borne;
 import com.schottenTotten.model.Carte;
+import com.schottenTotten.model.CarteTactique;
 import com.schottenTotten.model.GroupeDeCartes;
 import com.schottenTotten.model.Joueur;
 import com.schottenTotten.view.ConsoleView;
@@ -21,5 +22,7 @@ public interface Variante {
 
     boolean estCarteAction(Carte carte);
 
-    void executerAction(Carte carte, Joueur joueur, Joueur adversaire, GroupeDeCartes pioche, List<Borne> bornes, ConsoleView view);
+    void executerAction(CarteTactique carte, Joueur joueur, Joueur adversaire, 
+                    GroupeDeCartes pioche, List<Borne> bornes, 
+                    ConsoleView view, com.schottenTotten.ai.Coup coup); 
 }

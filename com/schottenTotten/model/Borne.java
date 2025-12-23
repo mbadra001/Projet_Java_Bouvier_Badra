@@ -21,7 +21,14 @@ public class Borne {
     }
 
     // Méthodes 
-    // Retourne true si la carte a été posée avec succès 
+    //  Retourne true si la carte a été posée avec succès 
+
+
+    public boolean estPleine(int numeroJoueur) {
+        if (numeroJoueur == 1) return cartesJoueur1.getNombreDeCartes() >= capaciteMax;
+        return cartesJoueur2.getNombreDeCartes() >= capaciteMax;
+    }
+    
     public boolean poserCarte(Carte carte, Joueur joueur) {
         if (possesseur != null) {
             // On retourne false : échec

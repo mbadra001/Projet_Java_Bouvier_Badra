@@ -2,6 +2,7 @@ package com.schottenTotten.view;
 
 import java.util.List;
 import com.schottenTotten.model.*;
+import com.schottenTotten.ai.Coup;
 
 
 public class ConsoleView {
@@ -19,16 +20,23 @@ public class ConsoleView {
     } 
 
 // IA--------------------
-// focntion pour afficher la main d'un joueur
-    public void afficherMain(Joueur joueur) {
-         System.out.println("\nMain de " + joueur.getNom() + " :");
-        List<Carte> main = joueur.getMain();
+public void afficherMain(Joueur joueur) {
+    System.out.println("\nMain de " + joueur.getNom() + " :");
+    List<Carte> main = joueur.getMain();
 
-        for (int i = 0; i < main.size(); i++) {
-            System.out.println("[" + i + "] " + main.get(i).description());
+    for (int i = 0; i < main.size(); i++) {
 
+        Carte c = main.get(i);
+
+        if (c instanceof CarteTactique) {
+            CarteTactique ct = (CarteTactique) c;
+            System.out.println("[" + i + "] TACTIQUE : " + ct.getCapacite());
+        } else {
+            System.out.println("[" + i + "] " + c.description());
+        }
     }
-    }
+}
+
 
 //------------------------------
 // fonction afficher action possible
@@ -121,4 +129,53 @@ public class ConsoleView {
     public void afficherErreurTactique(String msg) {
         System.out.println("! Action Tactique impossible : " + msg);
     }
+
+
+public Coup demanderCoupTactique(Joueur joueur) {
+
+    afficherMain(joueur);
+    System.out.println("\nSélectionnez la carte tactique à utiliser :");
+    int indexCarte = InputView.demanderEntier();
+
+    Carte carte = joueur.getMain().get(indexCarte);
+
+    if (!(carte instanceof CarteTactique)) {
+        afficherErreur("La carte sélectionnée n'est pas une carte tactique.");
+        return null;
+    }
+
+    String capacite = ((CarteTactique) carte).getCapacite();
+
+    switch (capacite) {
+
+        case "joker":
+            System.out.println("Vous utilisez une carte Joker.");
+            int couleur = InputView.demanderCouleurJoker();
+            return new Coup(indexCarte, capacite, couleur, -1);
+
+        case "espion":
+            System.out.println("Vous utilisez une carte Espion.");
+            return new Coup(indexCarte, capacite);
+
+        case "sapeur":
+            System.out.println("Vous utilisez une carte Sapeur.");
+            return new Coup(indexCarte, capacite);
+
+        case "reprise":
+            System.out.println("Vous utilisez une carte Reprise.");
+            return new Coup(indexCarte, capacite);
+
+        case "permutation":
+            System.out.println("Permutation : choisissez deux cartes normales à échanger.");
+            int c1 = InputView.demanderEntier();
+            int c2 = InputView.demanderEntier();
+            return new Coup(indexCarte, capacite, c1, c2);
+
+        default:
+            afficherErreur("Capacité tactique inconnue : " + capacite);
+            return null;
+    }
 }
+}
+
+

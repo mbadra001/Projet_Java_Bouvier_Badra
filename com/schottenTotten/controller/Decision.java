@@ -4,25 +4,24 @@ import com.schottenTotten.model.Carte;
 import com.schottenTotten.model.GroupeDeCartes;
 import java.util.*;
 
-public class Decision { //il va falloir aussi géré le cas de l'egalité
-                        //peut etre ajoute un marqueur sur la class carte 
-                        //qui serait modifié dans borne pour connaitre le dernier qui a pose sur la borne
+public class Decision {
 
     public static int determinerGagnant(GroupeDeCartes g1, GroupeDeCartes g2) {
         int score1 = calculerForce(g1);
         int score2 = calculerForce(g2);
 
-        if (score1 > score2) {
-            return 1;
-        } else if (score2 > score1) {
-            return 2;
-        }else {
-            return 0;
-        }
+        if (score1 > score2) return 1;
+        if (score2 > score1) return 2;
+        return 0;
     }
 
     public static int calculerForce(GroupeDeCartes groupe) {
         List<Carte> cartes = groupe.getCartes();
+        
+        // Si le groupe n'est pas complet , on ne peut pas calculer de combinaison On retourne juste la somme pour éviter le crash.
+        if (cartes.size() < 3) {
+            return calculSomme(cartes);
+        }
 
         boolean memeCouleur = estMemeCouleur(cartes);
         boolean suite = estSuite(cartes);
@@ -31,36 +30,34 @@ public class Decision { //il va falloir aussi géré le cas de l'egalité
 
         int score = 0;
 
-        if (memeCouleur && suite) {
-            score = 500;
-        } else if (brelan) {
-            score = 400;
-        } else if (memeCouleur) {
-            score = 300;
-        } else if (suite) {
-            score = 200;
-        } else {
-            score = 100;
-        }
+        if (memeCouleur && suite) score = 500;
+        else if (brelan) score = 400;
+        else if (memeCouleur) score = 300;
+        else if (suite) score = 200;
+        else score = 100;
 
         return score + somme;
     }
 
-    // Méthodes
     private static boolean estMemeCouleur(List<Carte> cartes) {
-        int codeCouleur = cartes.get(0).getCouleur();
-        return cartes.get(1).getCouleur() == codeCouleur && cartes.get(2).getCouleur() == codeCouleur;
+        if (cartes.size() < 3) return false;
+        int code = cartes.get(0).getCouleur();
+        return cartes.get(1).getCouleur() == code && cartes.get(2).getCouleur() == code;
     }
 
     private static boolean estBrelan(List<Carte> cartes) {
+        if (cartes.size() < 3) return false;
         int val = cartes.get(0).getValeur();
         return cartes.get(1).getValeur() == val && cartes.get(2).getValeur() == val;
     }
 
     private static boolean estSuite(List<Carte> cartes) {
-        cartes.sort(Comparator.comparingInt(Carte::getValeur)); //tri du paquet de carte (ligne genere par ia)
-        return (cartes.get(0).getValeur() + 1 == cartes.get(1).getValeur()) &&
-               (cartes.get(1).getValeur() + 1 == cartes.get(2).getValeur());
+        if (cartes.size() < 3) return false;
+        // On trie copie pour ne pas modifier l'ordre du plateau
+        List<Carte> triees = new ArrayList<>(cartes);
+        triees.sort(Comparator.comparingInt(Carte::getValeur));
+        return (triees.get(0).getValeur() + 1 == triees.get(1).getValeur()) &&
+               (triees.get(1).getValeur() + 1 == triees.get(2).getValeur());
     }
 
     private static int calculSomme(List<Carte> cartes) {
@@ -69,7 +66,6 @@ public class Decision { //il va falloir aussi géré le cas de l'egalité
         return somme;
     }
 
-    // méthode pour expliquer le résultat
     public static String expliquerVictoire(GroupeDeCartes g1, GroupeDeCartes g2) {
         int score1 = calculerForce(g1);
         int score2 = calculerForce(g2);
@@ -77,6 +73,7 @@ public class Decision { //il va falloir aussi géré le cas de l'egalité
         String type1 = nomCombinaison(score1);
         String type2 = nomCombinaison(score2);
         
+        // utilisation de score % 100 pour n'afficher que la partie somme
         return "J1 [" + type1 + " (" + (score1 % 100) + ")] vs J2 [" + type2 + " (" + (score2 % 100) + ")]";
     }
 
